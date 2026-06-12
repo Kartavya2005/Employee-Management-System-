@@ -35,7 +35,7 @@ public class Employee {
 
     private String address;
 
-    @Column(nullable = false, unique = true)
+
     private String phoneNumber;
 
     @JsonIgnore

@@ -3,10 +3,9 @@ package com.Project.Ems.Security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
@@ -24,55 +23,117 @@ public class JwtService {
     @Value("${jwt.expiration-ms:3600000}")
     private long expirationMs;
 
+    // Generate Secret Key
     private Key getSignKey() {
-        return Keys.hmacShaKeyFor(secretKey.getBytes());
+
+        return Keys.hmacShaKeyFor(
+                secretKey.getBytes()
+        );
     }
 
-    public String generateToken(UserDetails userDetails) {
+    // Generate JWT Token
+    public String generateToken(
+            String email,
+            String role
+    ) {
 
-        Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, userDetails);
+        Map<String, Object> claims =
+                new HashMap<>();
 
+        claims.put("role", role);
 
-    }
-
-    private String createToken(Map<String,Object> claims, UserDetails userDetails){
         return Jwts.builder()
+
                 .setClaims(claims)
-                .setSubject(userDetails.getUsername())
+
+                .setSubject(email)
+
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
-                .signWith(getSignKey(), SignatureAlgorithm.HS256)
+
+                .setExpiration(
+                        new Date(
+                                System.currentTimeMillis()
+                                        + expirationMs
+                        )
+                )
+
+                .signWith(
+                        getSignKey(),
+                        SignatureAlgorithm.HS256
+                )
+
                 .compact();
     }
-    public String extractEmail(String token) {
-        return extractClaim(token, Claims::getSubject);
+
+    // Extract Email
+    public String extractEmail(
+            String token
+    ) {
+
+        return extractClaim(
+                token,
+                Claims::getSubject
+        );
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = extractAllClaims(token);
+    // Generic Claim Extractor
+    public <T> T extractClaim(
+            String token,
+            Function<Claims, T> claimsResolver
+    ) {
+
+        final Claims claims =
+                extractAllClaims(token);
+
         return claimsResolver.apply(claims);
     }
 
-    public Claims extractAllClaims(String token){
+    // Extract All Claims
+    public Claims extractAllClaims(
+            String token
+    ) {
+
         return Jwts.parserBuilder()
+
                 .setSigningKey(getSignKey())
+
                 .build()
+
                 .parseClaimsJws(token)
+
                 .getBody();
     }
 
-    private Date extractExpiration(String token){
-        return extractClaim(token, Claims::getExpiration);
+    // Extract Expiration
+    private Date extractExpiration(
+            String token
+    ) {
+
+        return extractClaim(
+                token,
+                Claims::getExpiration
+        );
     }
 
-    private boolean isTokenExpired(String token) {
-    //    Date expiration = extractClaim(token, Claims::getExpiration);
-        return extractExpiration(token).before(new Date());
+    // Check Expiration
+    private boolean isTokenExpired(
+            String token
+    ) {
+
+        return extractExpiration(token)
+                .before(new Date());
     }
 
-    public boolean validateToken(String token, UserDetails userDetails) {
-        final String email = extractEmail(token);
-        return email.equals(userDetails.getUsername()) && !isTokenExpired(token);
+    // Validate Token
+    public boolean validateToken(
+            String token,
+            String email
+    ) {
+
+        final String tokenEmail =
+                extractEmail(token);
+
+        return tokenEmail.equals(email)
+                && !isTokenExpired(token);
     }
 }

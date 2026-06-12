@@ -13,7 +13,7 @@ import java.util.Collections;
 @Service
 @RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
-    private EmployeeRepository employeeRepository;
+    private final EmployeeRepository employeeRepository;
 
     public UserDetails loadUserByUsername(String email) {
         Employee employee = employeeRepository.findByEmail(email)

@@ -2,7 +2,7 @@ package com.Project.Ems.Service.Impl;
 
 import com.Project.Ems.DTO.AuthResponse;
 import com.Project.Ems.DTO.LoginRequest;
-import com.Project.Ems.DTO.RegisterRequest;
+
 import com.Project.Ems.Entity.Employee;
 import com.Project.Ems.Repository.EmployeeRepository;
 import com.Project.Ems.Security.JwtService;
@@ -27,33 +27,33 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
 
 
-    @Override
-    public AuthResponse register(RegisterRequest request) {
-        if (employeeRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already in use: " + request.getEmail());
-        }
-        Employee employee = Employee.builder()
-                .name(request.getName())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(request.getRole())
-                .build();
-
-        employeeRepository.save(employee);
-
-        String token = jwtService.generateToken(
-                new User(
-                        employee.getEmail(),
-                        employee.getPassword(),
-                        Collections.singletonList(
-                                new SimpleGrantedAuthority("ROLE_" + employee.getRole().name())
-                        )
-                )
-        );
-
-        return new AuthResponse(token);
-
-    }
+//    @Override
+//    public AuthResponse register(RegisterRequest request) {
+//        if (employeeRepository.findByEmail(request.getEmail()).isPresent()) {
+//            throw new RuntimeException("Email already in use: " + request.getEmail());
+//        }
+//        Employee employee = Employee.builder()
+//                .name(request.getName())
+//                .email(request.getEmail())
+//                .password(passwordEncoder.encode(request.getPassword()))
+//                .role(request.getRole())
+//                .build();
+//
+//        employeeRepository.save(employee);
+//
+//        String token = jwtService.generateToken(
+//                new User(
+//                        employee.getEmail(),
+//                        employee.getPassword(),
+//                        Collections.singletonList(
+//                                new SimpleGrantedAuthority("ROLE_" + employee.getRole().name())
+//                        )
+//                )
+//        );
+//
+//        return new AuthResponse(token);
+//
+//    }
 
     @Override
     public AuthResponse login(LoginRequest request) {
@@ -68,14 +68,8 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + request.getEmail()));
 
         String token = jwtService.generateToken(
-                new org.springframework.security.core.userdetails.User(
-                        employee.getEmail(),
-                        employee.getPassword(),
-                        java.util.Collections.singletonList(
-                                new org.springframework.security.core.authority
-                                        .SimpleGrantedAuthority("ROLE_" + employee.getRole().name())
-                        )
-                )
+                employee.getEmail(),
+                String.valueOf(employee.getRole())
         );
 
         return new AuthResponse(token);

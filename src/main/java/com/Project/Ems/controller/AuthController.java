@@ -2,7 +2,7 @@ package com.Project.Ems.controller;
 
 import com.Project.Ems.DTO.AuthResponse;
 import com.Project.Ems.DTO.LoginRequest;
-import com.Project.Ems.DTO.RegisterRequest;
+
 import com.Project.Ems.Entity.Employee;
 import com.Project.Ems.Exceptions.InvalidCredentialsException;
 import com.Project.Ems.Repository.EmployeeRepository;
@@ -21,19 +21,11 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-        AuthResponse response = authService.register(request);
-        return ResponseEntity.ok(response);
-    }
-
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
-        try {
+
             AuthResponse response = authService.login(request);
             return ResponseEntity.ok(response);
-        } catch (InvalidCredentialsException e) {
-            return ResponseEntity.status(401).body(new AuthResponse(e.getMessage()));
-        }
+
     }
 }

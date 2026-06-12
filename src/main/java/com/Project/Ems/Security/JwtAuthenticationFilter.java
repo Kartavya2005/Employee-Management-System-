@@ -25,6 +25,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserDetailsServiceImpl userDetailsService;
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getServletPath();
+        // Exclude auth and Swagger endpoints from the JWT filter entirely
+        return path.startsWith("/auth") || 
+               path.startsWith("/swagger-ui") || 
+               path.startsWith("/v3/api-docs");
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws IOException, ServletException {
@@ -37,25 +46,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        jwtToken = authHeader.substring(7);
-        email = jwtService.extractEmail(jwtToken);
+        try {
+            jwtToken = authHeader.substring(7);
+            email = jwtService.extractEmail(jwtToken);
 
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null
-                ) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-            if (jwtService.validateToken(jwtToken, userDetails)) {
-                UsernamePasswordAuthenticationToken authenticationToken =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
-                        );
+                if (jwtService.validateToken(jwtToken, email)) {
+                    UsernamePasswordAuthenticationToken authenticationToken =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities()
+                            );
 
-                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                    authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                }
             }
+        } catch (Exception e) {
+            // Log the exception so you can see exactly WHY it failed in your console (e.g. Expired token)
+            System.err.println("JWT Authentication failed: " + e.getMessage());
         }
+        
         filterChain.doFilter(request, response);
     }
 }
