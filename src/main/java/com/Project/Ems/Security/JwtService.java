@@ -25,43 +25,23 @@ public class JwtService {
 
     // Generate Secret Key
     private Key getSignKey() {
-
         return Keys.hmacShaKeyFor(
                 secretKey.getBytes()
         );
     }
-
     // Generate JWT Token
     public String generateToken(
             String email,
             String role
     ) {
-
-        Map<String, Object> claims =
-                new HashMap<>();
-
+        Map<String, Object> claims = new HashMap<>();
         claims.put("role", role);
-
         return Jwts.builder()
-
                 .setClaims(claims)
-
                 .setSubject(email)
-
                 .setIssuedAt(new Date())
-
-                .setExpiration(
-                        new Date(
-                                System.currentTimeMillis()
-                                        + expirationMs
-                        )
-                )
-
-                .signWith(
-                        getSignKey(),
-                        SignatureAlgorithm.HS256
-                )
-
+                .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
+                .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -69,7 +49,6 @@ public class JwtService {
     public String extractEmail(
             String token
     ) {
-
         return extractClaim(
                 token,
                 Claims::getSubject
@@ -81,10 +60,7 @@ public class JwtService {
             String token,
             Function<Claims, T> claimsResolver
     ) {
-
-        final Claims claims =
-                extractAllClaims(token);
-
+        final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
@@ -92,15 +68,10 @@ public class JwtService {
     public Claims extractAllClaims(
             String token
     ) {
-
         return Jwts.parserBuilder()
-
                 .setSigningKey(getSignKey())
-
                 .build()
-
                 .parseClaimsJws(token)
-
                 .getBody();
     }
 
@@ -108,7 +79,6 @@ public class JwtService {
     private Date extractExpiration(
             String token
     ) {
-
         return extractClaim(
                 token,
                 Claims::getExpiration
@@ -119,7 +89,6 @@ public class JwtService {
     private boolean isTokenExpired(
             String token
     ) {
-
         return extractExpiration(token)
                 .before(new Date());
     }
@@ -129,10 +98,8 @@ public class JwtService {
             String token,
             String email
     ) {
-
         final String tokenEmail =
                 extractEmail(token);
-
         return tokenEmail.equals(email)
                 && !isTokenExpired(token);
     }

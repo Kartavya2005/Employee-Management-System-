@@ -17,13 +17,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     public UserDetails loadUserByUsername(String email) {
         Employee employee = employeeRepository.findByEmail(email)
-                .orElseThrow(() -> new EmployeeNotFoundException("employee not found with email: " + email));
+                .orElseThrow(() -> new EmployeeNotFoundException("Employee not found with email: " + email));
 
         return new org.springframework.security.core.userdetails.User(
                 employee.getEmail(),
                 employee.getPassword(),
                 Collections.singleton(
-                        new SimpleGrantedAuthority("ROLE_" + employee .getRole().name())
+                        new SimpleGrantedAuthority("ROLE_" + employee.getRole().name())
                  )
 
         );
