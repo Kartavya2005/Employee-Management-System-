@@ -2,7 +2,9 @@ package com.Project.Ems.Service;
 
 import com.Project.Ems.Entity.Employee;
 import com.Project.Ems.DTO.EmployeeRequest;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface EmployeeService {
@@ -22,4 +24,8 @@ public interface EmployeeService {
 //    List<Employee> searchByName(String name);
 //    List<Employee> searchByPhoneNumber(String phoneNumber);
 //    List<Employee> searchByEmail(String email);
+
+   // List<Employee> importAllEmployee();
+
+    void importAllEmployees(MultipartFile file) throws IOException;
 }

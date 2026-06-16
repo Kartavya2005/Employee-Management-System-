@@ -20,9 +20,7 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 )
 @OpenAPIDefinition(security = {@SecurityRequirement(name = "BearerAuth")})
 public class EmsApplication {
-
 	public static void main(String[] args) {
 		SpringApplication.run(EmsApplication.class, args);
 	}
-
 }

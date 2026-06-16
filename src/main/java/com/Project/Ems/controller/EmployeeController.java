@@ -11,7 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -81,4 +83,12 @@ public class EmployeeController {
     }
 
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping(value = "/import", consumes = "multipart/form-data")
+    public ResponseEntity<String> importAllEmployees(@RequestParam("file") MultipartFile file) throws IOException {
+
+        employeeService.importAllEmployees(file);
+
+        return ResponseEntity.ok("employees imported successfully");
+    }
 }

@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+@Slf4j
 @Service
 public class JwtService {
 
@@ -34,6 +36,7 @@ public class JwtService {
             String email,
             String role
     ) {
+        log.debug("Generating JWT token for email: {}", email);
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", role);
         return Jwts.builder()
@@ -43,12 +46,14 @@ public class JwtService {
                 .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
+
     }
 
     // Extract Email
     public String extractEmail(
             String token
     ) {
+        log.debug("Extracting email from JWT token");
         return extractClaim(
                 token,
                 Claims::getSubject
@@ -60,6 +65,7 @@ public class JwtService {
             String token,
             Function<Claims, T> claimsResolver
     ) {
+        log.debug("Extracting claim from JWT token");
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
@@ -68,6 +74,7 @@ public class JwtService {
     public Claims extractAllClaims(
             String token
     ) {
+        log.debug("Extracting all claims from JWT token");
         return Jwts.parserBuilder()
                 .setSigningKey(getSignKey())
                 .build()
@@ -79,6 +86,7 @@ public class JwtService {
     private Date extractExpiration(
             String token
     ) {
+        log.debug("Extracting expiration from JWT token");
         return extractClaim(
                 token,
                 Claims::getExpiration
@@ -89,6 +97,7 @@ public class JwtService {
     private boolean isTokenExpired(
             String token
     ) {
+        log.debug("Checking expiration of JWT token");
         return extractExpiration(token)
                 .before(new Date());
     }
@@ -98,8 +107,10 @@ public class JwtService {
             String token,
             String email
     ) {
+        log.info("Validating JWT token for email: {}", email);
         final String tokenEmail =
                 extractEmail(token);
+        log.info("Token email: {}, Email: {}", tokenEmail, email);
         return tokenEmail.equals(email)
                 && !isTokenExpired(token);
     }

@@ -26,7 +26,6 @@ public class ApplicationConfig {
     // Password Encoder
     @Bean
     public PasswordEncoder passwordEncoder() {
-
         return new BCryptPasswordEncoder();
     }
 
@@ -40,11 +39,9 @@ public class ApplicationConfig {
         authProvider.setUserDetailsService(
                 userDetailsService
         );
-
         authProvider.setPasswordEncoder(
                 passwordEncoder()
         );
-
         return authProvider;
     }
 

@@ -28,43 +28,31 @@ public class AuthServiceImpl implements AuthService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
-
     @Override
     public AuthResponse login(LoginRequest request) {
-
-        log.info(
-                "Login attempt for email: {}",
-                request.getEmail()
-        );
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
                         request.getPassword()
                 )
         );
-
         Employee employee =
                 employeeRepository.findByEmail(
                                 request.getEmail()
                         )
-
                         .orElseThrow(() -> {
-
                             log.error(
                                     "User not found with email: {}",
                                     request.getEmail()
                             );
-
                             return new RuntimeException(
                                     "User not found"
                             );
                         });
-
         log.info(
                 "User authenticated successfully: {}",
                 employee.getEmail()
         );
-
         String token = jwtService.generateToken(
                 employee.getEmail(),
                 String.valueOf(employee.getRole())
@@ -72,9 +60,7 @@ public class AuthServiceImpl implements AuthService {
         log.info(
                 "JWT token generated for user: {}",
                 employee.getEmail()
-
         );
-
         return new AuthResponse(token);
     }
 }
